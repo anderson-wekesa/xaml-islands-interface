@@ -47,7 +47,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 	}
 
-	//InitializeWinRT();
+	
 
 	winrt::init_apartment(apartment_type::single_threaded);
 	WindowsXamlManager winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
@@ -174,42 +174,4 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-}
-
-
-
-inline void InitializeWinRT()
-{
-	winrt::init_apartment(apartment_type::single_threaded);
-	WindowsXamlManager winxamlmanager = WindowsXamlManager::InitializeForCurrentThread();
-
-	DesktopWindowXamlSource xs;
-	auto interopDetail = xs.as<IDesktopWindowXamlSourceNative>();
-	check_hresult(interopDetail -> AttachToWindow(hMainWindow));
-
-	check_hresult(interopDetail -> get_WindowHandle(&hWndXamlIsland));
-
-	GetClientRect(hMainWindow, &rMainRect);
-
-	SetWindowPos(hWndXamlIsland, 0, 0, 0, (rMainRect.right), (rMainRect.bottom), SWP_SHOWWINDOW);
-
-	winrt::param::hstring str(LR"(
-		<Grid Name="MainGrid" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-			xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-			<Button x:Name="button" Content="First Button" HorizontalAlignment="Left" Height="40" Margin="160,134,0,0" VerticalAlignment="Top" Width="166"/>
-			<Button x:Name="button1" Content="Second Button" Click="Button_Click" HorizontalAlignment="Left" Height="40" Margin="586,134,0,0" VerticalAlignment="Top" Width="140"/>
-		</Grid>
-	)");
-
-	IInspectable ins = XamlReader::Load(str);
-	xs.Content(ins.as<UIElement>());
-
-
-
-	//Register Click Event Handlers
-
-	ins.as<Grid>().FindName(L"button").as<Button>().Click([](const IInspectable& sender, const RoutedEventArgs&)
-	{
-		MessageBox(NULL, L"Second Button Clicked", L"Check", MB_OK | MB_ICONINFORMATION);
-	});
 }
